@@ -1,0 +1,351 @@
+***Calendar Heatmap for 30-day ROI 
+
+***install required packages
+
+install.packages("ggplot2")
+install.packages("plyr")
+install.packages("plotly")
+
+library(readr)
+heatmap_price <- read_csv("~/Desktop/ETH_ROI.csv", 
++     col_types = cols(ROI = col_number(), 
++         date = col_date(format = "%d/%m/%Y")))
+
+View(heatmap_price)
+
+library(ggplot2)
+source("https://raw.githubusercontent.com/iascchen/VisHealth/master/R/calendarHeat.R")
+library(plyr)
+library(plotly)
+
+r2g <- c("#D61818", "#B5E384")
+calendarHeat(ETH_ROI$date, ETH_ROI$ROI, ncolors = 2, color = "r2g", varname="Ether 30-day ROI")
+
+
+--------------------------------------------------------------
+***Volatility Calendar Heatmap, use ETH_Vty.csv data:
+
+***import data
+
+library(readr)
+ETH_Vty <- read_csv("Downloads/ETH_Vty.csv", 
+    col_types = cols(Date = col_date(format = "%d/%m/%Y"), 
+        Vty = col_number()))
+View(ETH_Vty)
+
+***create heatmap 
+
+library(ggplot2)
+source("https://raw.githubusercontent.com/iascchen/VisHealth/master/R/calendarHeat.R")
+library(plyr)
+library(plotly)
+r2g <- c("#D61818", "#B5E384")
+calendarHeat(ETH_Vty$date, ETH_Vty$Vty, ncolors = 2, color = "r2g", varname="Ether 30-day Volatility")
+
+
+----------------------------------
+***Monthly plots
+
+***install required packages
+
+install.packages("ggplot2")
+
+***import data
+
+library(readr)
+ETH_Monthly <- read_csv("Downloads/ETH_Monthly.csv", 
+    col_types = cols(ChangeBTC = col_number(), 
+        ChangeUSD = col_number(), Month = col_factor(levels = c("January", 
+            "February", "March", "April", 
+            "May", "June", "July", "August", 
+            "September", "October", "November", 
+            "December")), Year = col_factor(levels = c("2015", 
+            "2016", "2017", "2018", "2019", 
+            "2020"))))
+View(ETH_Monthly)
+
+***plot ETH-USD monthly returns with outliers
+
+library(ggplot2)
+
+ggplot(ETH_Monthly, aes(x=Month, y=ChangeUSD, fill=Month)) + geom_violin() + ylab("% Price Change") + stat_summary(fun.y=mean, geom="point", shape=23, size=2, colour="blue") + ggtitle("Monthly ETH-USD Returns Aug 2015-Jun 2020")
+
+***plot ETH-BTC monthly returns with outliers
+
+ggplot(ETH_Monthly, aes(x=Month, y=ChangeBTC, fill=Month)) + geom_violin() + ylab("% Price Change") + stat_summary(fun.y=mean, geom="point", shape=23, size=2, colour="blue") + ggtitle("Monthly ETH-BTC Returns Aug 2015-Jun 2020")
+
+
+--------------------------------------
+Day-of-the-week plot
+
+***install required packages
+
+install.packages("ggplot2")
+
+***import data
+
+library(readr)
+ETH_Weekday <- read_csv("Downloads/ETH_Weekday.csv", 
+    col_types = cols(BTC_return = col_number(), 
+        PriceBTC = col_number(), PriceUSD = col_number(), 
+        USD_return = col_number(), Weekday = col_factor(levels = c("Sunday", 
+            "Monday", "Tuesday", "Wednesday", 
+            "Thursday", "Friday", "Saturday")), 
+        date = col_date(format = "%d/%m/%Y")))
+View(ETH_Weekday)
+
+***Plot ETH-USD returns by day of the week
+
+ggplot(ETH_Weekday, aes(x=Weekday, y=USD_return, fill=Weekday)) + geom_violin() + ylab("% Price Change") + stat_summary(fun.y=mean, geom="point", shape=23, size=2, colour="blue") + ggtitle("Daily ETH-USD Returns Aug 9 2015-14 Jul 2020")
+
+***Plot ETH-BTC returns by day of the week
+
+ggplot(ETH_Weekday, aes(x=Weekday, y=BTC_return, fill=Weekday)) + geom_violin() + ylab("% Price Change") + stat_summary(fun.y=mean, geom="point", shape=23, size=2, colour="blue") + ggtitle("Daily ETH-BTC Returns Aug 9 2015-14 Jul 2020")
+
+------------------------------------------------------------------------------------------------------
+****1-hour/4-hour heatmaps for Average Returns, Volatility and Candle Body Ratio for both ETH-USD and ETH-BTC
+
+*** Bitfinex data for both pairs is taken from Cryptodatum.io/TradingView - both require subscription or involve a cost. 
+
+***Install required packages in R Studio:
+
+install.packages("ggplot2")
+install.packages("ggthemes")
+
+
+***import the data into R Studio, ETHUSD_1h is the name of the .csv file for the hourly price data for ETH-USD:
+
+library(readr)
+ETHUSD_1h <- read_csv("Downloads/ETHUSD_1h.csv", 
+    col_types = cols(CBR = col_number(), 
+        Change = col_number(), Close = col_skip(), 
+        Date = col_date(format = "%d/%m/%Y"), 
+        High = col_skip(), Low = col_skip(), 
+        Month = col_skip(), Open = col_skip(), 
+        Time = col_factor(levels = c("00:00", 
+            "01:00", "02:00", "03:00", "04:00", 
+            "05:00", "06:00", "07:00", "08:00", 
+            "09:00", "10:00", "11:00", "12:00", 
+            "13:00", "14:00", "15:00", "16:00", 
+            "17:00", "18:00", "19:00", "20:00", 
+            "21:00", "22:00", "23:00")), 
+        Volatility = col_number(), Volume = col_skip(), 
+        Weekday = col_factor(levels = c("Sunday", 
+            "Monday", "Tuesday", "Wednesday", 
+            "Thursday", "Friday", "Saturday")), 
+        Year = col_skip()))
+View(ETHUSD_1h)
+
+***Plot 1-hour Average Return Heatmap for ETH-USD:
+
+library(ggplot2)
+library(ggthemes)
+ggplot(ETHUSD_1h, aes(x=Time, y=Day, fill = Change)) + 
+  geom_tile(color = "white", size = 0.1, stat = 'summary_2d') + 
+  scale_x_discrete(expand=c(0,0)) + 
+  scale_y_discrete(expand=c(0,0)) + 
+  scale_fill_viridis_c(name=“Mean Price Change”, option = "plasma") + 
+  coord_equal() +  
+  theme_tufte(base_family="Helvetica") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+
+
+***Plot Average Hourly Volatility Heatmap:
+
+library(ggplot2)
+library(ggthemes)
+ggplot(ETHUSD_1h, aes(x=Time, y=Weekday, fill = Volatility)) + 
+  geom_tile(color = "white", size = 0.1, stat = 'summary_2d') + 
+  scale_x_discrete(expand=c(0,0)) + 
+  scale_y_discrete(expand=c(0,0)) + 
+  scale_fill_viridis_c(name=“Average Price Volatility”, option = "plasma") + 
+  coord_equal() +  
+  theme_tufte(base_family="Helvetica") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+
+
+***Plot Average Hourly Candle Body Ratio Heatmap:
+
+library(ggplot2)
+library(ggthemes)
+ggplot(ETHUSD_1h, aes(x=Time, y=Weekday, fill = CBR)) + 
+  geom_tile(color = "white", size = 0.1, stat = 'summary_2d') + 
+  scale_x_discrete(expand=c(0,0)) + 
+  scale_y_discrete(expand=c(0,0)) + 
+  scale_fill_viridis_c(name=“Average Candle Body Ratio”, option = "plasma") + 
+  coord_equal() +  
+  theme_tufte(base_family="Helvetica") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+
+***import ETH-BTC 1-hour price data:
+
+library(readr)
+ETHBTC_1h <- read_csv("Downloads/ETHUSD_1h.csv", 
+    col_types = cols(CBR = col_number(), 
+        Change = col_number(), Close = col_skip(), 
+        Date = col_date(format = "%d/%m/%Y"), 
+        High = col_skip(), Low = col_skip(), 
+        Open = col_skip(), Time = col_factor(levels = c("00:00", 
+            "01:00", "02:00", "03:00", "04:00", 
+            "05:00", "06:00", "07:00", "08:00", 
+            "09:00", "10:00", "11:00", "12:00", 
+            "13:00", "14:00", "15:00", "16:00", 
+            "17:00", "18:00", "19:00", "20:00", 
+            "21:00", "22:00", "23:00")), 
+        Volatility = col_number(), Volume = col_skip(), 
+        Weekday = col_factor(levels = c("Sunday", 
+            "Monday", "Tuesday", "Wednesday", 
+            "Thursday", "Friday", "Saturday"))))
+
+***Plot 1-hour Average Return Heatmap for ETH-USD:
+
+library(ggplot2)
+library(ggthemes)
+ggplot(ETHBTC_1h, aes(x=Time, y=Day, fill = Change)) + 
+  geom_tile(color = "white", size = 0.1, stat = 'summary_2d') + 
+  scale_x_discrete(expand=c(0,0)) + 
+  scale_y_discrete(expand=c(0,0)) + 
+  scale_fill_viridis_c(name=“Mean Price Change”, option = "plasma") + 
+  coord_equal() +  
+  theme_tufte(base_family="Helvetica") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+
+
+***Plot Average Hourly Volatility Heatmap:
+
+library(ggplot2)
+library(ggthemes)
+ggplot(ETHBTC_1h, aes(x=Time, y=Weekday, fill = Volatility)) + 
+  geom_tile(color = "white", size = 0.1, stat = 'summary_2d') + 
+  scale_x_discrete(expand=c(0,0)) + 
+  scale_y_discrete(expand=c(0,0)) + 
+  scale_fill_viridis_c(name=“Average Price Volatility”, option = "plasma") + 
+  coord_equal() +  
+  theme_tufte(base_family="Helvetica") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+
+
+***Plot Average Hourly Candle Body Ratio Heatmap:
+
+library(ggplot2)
+library(ggthemes)
+ggplot(ETHBTC_1h, aes(x=Time, y=Weekday, fill = CBR)) + 
+  geom_tile(color = "white", size = 0.1, stat = 'summary_2d') + 
+  scale_x_discrete(expand=c(0,0)) + 
+  scale_y_discrete(expand=c(0,0)) + 
+  scale_fill_viridis_c(name=“Average Candle Body Ratio”, option = "plasma") + 
+  coord_equal() +  
+  theme_tufte(base_family="Helvetica") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+ 
+ -------------------------------------------------------------- 
+ ***import 4-hour data for ETH-USD
+ 
+ library(readr)
+> ETHUSD_4h <- read_csv("Downloads/ETHUSD_4h.csv", 
++     col_types = cols(CBR = col_number(), 
++         Change = col_number(), Close = col_skip(), 
++         Date = col_date(format = "%d/%m/%Y"), 
++         Date_1 = col_skip(), High = col_skip(), 
++         Low = col_skip(), Open = col_skip(), 
++         Time = col_factor(levels = c("00:00", 
++             "04:00", "08:00", "12:00", "16:00", 
++             "20:00")), Volatility = col_number(), 
++         Volume = col_skip(), Weekday = col_factor(levels = c("Sunday", 
++             "Monday", "Tuesday", "Wednesday", 
++             "Thursday", "Friday", "Saturday"))))
+view(ETHUSD_4h)
+
+***Plot 4-hour returns heatmap for ETH-USD:
+
+library(ggplot2)
+library(ggthemes)
+ggplot(ETHUSD_4h, aes(x=Time, y=Weekday, fill = Change)) + 
+  geom_tile(color = "white", size = 0.1, stat = 'summary_2d') + 
+  scale_x_discrete(expand=c(0,0)) + 
+  scale_y_discrete(expand=c(0,0)) + 
+  scale_fill_viridis_c(name=“Mean Price Change”, option = "plasma") + 
+  coord_equal() +  
+  theme_tufte(base_family="Helvetica") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+ 
+***Plot 4-hour volatility heatmap for ETH-USD:
+  
+library(ggplot2)
+library(ggthemes)
+ggplot(ETHUSD_4h, aes(x=Time, y=Weekday, fill = Volatility)) + 
+  geom_tile(color = "white", size = 0.1, stat = 'summary_2d') + 
+  scale_x_discrete(expand=c(0,0)) + 
+  scale_y_discrete(expand=c(0,0)) + 
+  scale_fill_viridis_c(name=“Average Price Volatility”, option = "plasma") + 
+  coord_equal() +  
+  theme_tufte(base_family="Helvetica") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+  
+***Plot 4-hour Candle Body Ratio heatmap for ETH-USD:
+
+library(ggplot2)
+library(ggthemes)
+ggplot(ETHUSD_4h, aes(x=Time, y=Weekday, fill = CBR)) + 
+  geom_tile(color = "white", size = 0.1, stat = 'summary_2d') + 
+  scale_x_discrete(expand=c(0,0)) + 
+  scale_y_discrete(expand=c(0,0)) + 
+  scale_fill_viridis_c(name=“Average Candle Body Ratio”, option = "plasma") + 
+  coord_equal() +  
+  theme_tufte(base_family="Helvetica") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+
+***import 4-hour data for ETH-BTC:
+
+library(readr)
+ETHBTC_4h <- read_csv("Downloads/ETHBTC_4h.csv", 
+    col_types = cols(CBR = col_number(), 
+        Change = col_number(), Close = col_skip(), 
+        Date = col_date(format = "%d/%m/%Y"), 
+        High = col_skip(), Low = col_skip(), 
+        Open = col_skip(), Time = col_factor(levels = c("00:00", 
+            "04:00", "08:00", "12:00", "16:00", 
+            "20:00")), Volatility = col_number(), 
+        Volume = col_skip(), Weekday = col_factor(levels = c("Sunday", 
+            "Monday", "Tuesday", "Wednesday", 
+            "Thursday", "Friday", "Saturday"))))
+View(ETHBTC_4h)
+
+***Plot 4-hour returns heatmap for ETH-BTC:
+
+library(ggplot2)
+library(ggthemes)
+ggplot(ETHBTC_4h, aes(x=Time, y=Weekday, fill = Change)) + 
+  geom_tile(color = "white", size = 0.1, stat = 'summary_2d') + 
+  scale_x_discrete(expand=c(0,0)) + 
+  scale_y_discrete(expand=c(0,0)) + 
+  scale_fill_viridis_c(name=“Mean Price Change”, option = "plasma") + 
+  coord_equal() +  
+  theme_tufte(base_family="Helvetica") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+ 
+***Plot 4-hour volatility heatmap for ETH-BTC:
+  
+library(ggplot2)
+library(ggthemes)
+ggplot(ETHBTC_4h, aes(x=Time, y=Weekday, fill = Volatility)) + 
+  geom_tile(color = "white", size = 0.1, stat = 'summary_2d') + 
+  scale_x_discrete(expand=c(0,0)) + 
+  scale_y_discrete(expand=c(0,0)) + 
+  scale_fill_viridis_c(name=“Average Price Volatility”, option = "plasma") + 
+  coord_equal() +  
+  theme_tufte(base_family="Helvetica") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+  
+***Plot 4-hour Candle Body Ratio heatmap for ETH-BTC:
+
+library(ggplot2)
+library(ggthemes)
+ggplot(ETHBTC_4h, aes(x=Time, y=Weekday, fill = CBR)) + 
+  geom_tile(color = "white", size = 0.1, stat = 'summary_2d') + 
+  scale_x_discrete(expand=c(0,0)) + 
+  scale_y_discrete(expand=c(0,0)) + 
+  scale_fill_viridis_c(name=“Average Candle Body Ratio”, option = "plasma") + 
+  coord_equal() +  
+  theme_tufte(base_family="Helvetica") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
